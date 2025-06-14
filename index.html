@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bits</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+</head>
+<body>
+    <button id="navToggle" class="material-symbols-outlined" style="position:fixed;top:10px;right:10px;z-index:1000;color:white;background:none;border:none;font-size:2rem;cursor:pointer;">
+  menu
+</button>
+
+  <div id="grid">
+  <div id="Academics" data-window-id="windowAcademics">
+    Academics
+    <div class="headers">
+      <span class="AcademicsArrow material-symbols-outlined">folder</span>
+    </div>
+  </div>
+
+  <div id="OrgProd" data-window-id="windowOrgProd">
+    Organization & <br> Productivity
+    <div class="headers">
+      <span class="OrgProdArrow material-symbols-outlined">folder</span>
+    </div>
+  </div>
+
+  <div id="LifeCollegeTools" data-window-id="windowLife">
+    Life & College Tools
+    <div class="headers">
+      <span class="LifeCollegeToolsArrow material-symbols-outlined">folder</span>
+    </div>
+  </div>
+
+  <div id="Motivation" data-window-id="windowMotivation">
+    Motivation
+    <div class="headers">
+      <span class="MotivationArrow material-symbols-outlined">folder</span>
+    </div>
+  </div>
+</div>
+
+<!-- Pop-up windows (initially hidden) -->
+<div class="folder-window" id="windowAcademics">
+  <div class="window-header">
+    Academics <span class="close-btn">&times;</span>
+  </div>
+  <div class="window-body">
+    Academic tools, notes, and apps go here.
+  </div>
+    <div class="resize-handle"></div>
+
+</div>
+
+<div class="folder-window" id="windowOrgProd">
+  <div class="window-header">
+    Organization & Productivity <span class="close-btn">&times;</span>
+  </div>
+  <div class="window-body">
+    Task managers, calendars, etc.
+  </div>
+    <div class="resize-handle"></div>
+
+</div>
+
+<div class="folder-window" id="windowLife">
+  <div class="window-header">
+    Life & College Tools <span class="close-btn">&times;</span>
+  </div>
+  <div class="window-body">
+    Campus tools, budgets, etc.
+  </div>
+    <div class="resize-handle"></div>
+
+</div>
+
+<div class="folder-window" id="windowMotivation">
+  <div class="window-header">
+    Motivation <span class="close-btn">&times;</span>
+  </div>
+  <div class="window-body">
+    Quotes, music, inspiration.
+  </div>
+    <div class="resize-handle"></div>
+</div>
+
+  <script src="script.js"></script>
+</body>
+</html>
