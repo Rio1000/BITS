@@ -3,49 +3,90 @@ document.addEventListener("DOMContentLoaded", () => {
   const windows = document.querySelectorAll(".folder-window");
   const closeButtons = document.querySelectorAll(".close-btn");
 
-  // Restore saved position, size and visibility
-  windows.forEach(win => {
-    const id = win.id;
+  const isMobile = () => window.innerWidth <= 600;
+  const getPrefix = () => (isMobile() ? "Mobile" : "Desktop");
 
-    // Position
-    const savedPos = localStorage.getItem(`windowPos_${id}`);
+  // Restore saved state
+  windows.forEach(win => {
+  const id = win.id;
+  const prefix = getPrefix();
+  console.log(`Screen mode: ${getPrefix()}`);
+
+  if (isMobile()) {
+    // Apply mobile styles only if not already applied
+    if (!win.classList.contains("mobile-locked")) {
+      console.log(`Applying mobile layout to window: ${id}`);
+      win.style.position = "fixed";
+      win.style.top = "0";
+      win.style.left = "0";
+      win.style.width = "100vw";
+      win.style.height = "100vh";
+      win.style.transform = "none";
+      win.classList.add("mobile-locked");
+    } else {
+      console.log(`Mobile layout already applied to window: ${id}`);
+    }
+  } else {
+    // Clear mobile styles
+    if (win.classList.contains("mobile-locked")) {
+      console.log(`Removing mobile layout from window: ${id}`);
+      win.classList.remove("mobile-locked");
+      win.style.position = "";
+      win.style.top = "";
+      win.style.left = "";
+      win.style.width = "";
+      win.style.height = "";
+      win.style.transform = "";
+    }
+
+    // Restore saved position
+    const savedPos = localStorage.getItem(`windowPos_Desktop_${id}`);
     if (savedPos) {
       const { left, top } = JSON.parse(savedPos);
+      console.log(`Restoring position for window ${id}: left=${left}, top=${top}`);
       win.style.left = left + "px";
       win.style.top = top + "px";
       win.style.transform = "none";
+    } else {
+      console.log(`No saved position for window: ${id}`);
     }
 
-    // Size
-    const savedSize = localStorage.getItem(`windowSize_${id}`);
+    // Restore saved size
+    const savedSize = localStorage.getItem(`windowSize_Desktop_${id}`);
     if (savedSize) {
       const { width, height } = JSON.parse(savedSize);
-      if(width && height) {
-        win.style.width = width + "px";
-        win.style.height = height + "px";
-      }
-    }
-
-    // Visibility
-    const savedOpen = localStorage.getItem(`windowOpen_${id}`);
-    if (savedOpen === "true") {
-      win.classList.add("show");
+      console.log(`Restoring size for window ${id}: width=${width}, height=${height}`);
+      win.style.width = width + "px";
+      win.style.height = height + "px";
     } else {
-      win.classList.remove("show");
+      console.log(`No saved size for window: ${id}`);
     }
-  });
 
+    // Restore visibility
+    const savedOpen = localStorage.getItem(`windowOpen_${id}`);
+    console.log(`Restoring visibility for window ${id}: show=${savedOpen === "true"}`);
+    win.classList.toggle("show", savedOpen === "true");
+  }
+});
+
+
+  // Folder click opens window
   folders.forEach(folder => {
     folder.addEventListener("click", () => {
       const windowId = folder.getAttribute("data-window-id");
-      const windowToShow = document.getElementById(windowId);
-      if (windowToShow) {
-        windowToShow.classList.add("show");
-        localStorage.setItem(`windowOpen_${windowId}`, "true");
+      const win = document.getElementById(windowId);
+      if (win) {
+        win.classList.add("show");
+        localStorage.setItem(`windowOpen_${win.id}`, "true");
+      }
+
+      if (isMobile()) {
+        document.getElementById("grid").classList.remove("show");
       }
     });
   });
 
+  // Close button
   closeButtons.forEach(btn => {
     btn.addEventListener("click", e => {
       const win = e.target.closest(".folder-window");
@@ -56,9 +97,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Dragging functionality
+  // Dragging
   windows.forEach(win => {
+    if (win.classList.contains("mobile-locked")) return;
+
     const header = win.querySelector(".window-header");
+    if (!header) return;
+
     let isDragging = false;
     let offsetX, offsetY;
 
@@ -67,25 +112,26 @@ document.addEventListener("DOMContentLoaded", () => {
       const rect = win.getBoundingClientRect();
       offsetX = e.clientX - rect.left;
       offsetY = e.clientY - rect.top;
-      document.body.style.userSelect = 'none';
+      document.body.style.userSelect = "none";
     });
 
-    document.addEventListener("mouseup", e => {
+    document.addEventListener("mouseup", () => {
       if (isDragging) {
         isDragging = false;
-        document.body.style.userSelect = 'auto';
+        document.body.style.userSelect = "auto";
 
+        const prefix = getPrefix();
         const left = win.offsetLeft;
         const top = win.offsetTop;
-        localStorage.setItem(`windowPos_${win.id}`, JSON.stringify({ left, top }));
+        localStorage.setItem(`windowPos_${prefix}_${win.id}`, JSON.stringify({ left, top }));
       }
     });
 
     document.addEventListener("mousemove", e => {
       if (!isDragging) return;
+
       let left = e.clientX - offsetX;
       let top = e.clientY - offsetY;
-
       const winWidth = win.offsetWidth;
       const winHeight = win.offsetHeight;
       const maxLeft = window.innerWidth - winWidth;
@@ -100,8 +146,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Resizing functionality
+  // Resizing
   windows.forEach(win => {
+    if (win.classList.contains("mobile-locked")) return;
+
     const resizeHandle = win.querySelector(".resize-handle");
     if (!resizeHandle) return;
 
@@ -116,18 +164,18 @@ document.addEventListener("DOMContentLoaded", () => {
       startY = e.clientY;
       startWidth = rect.width;
       startHeight = rect.height;
-      document.body.style.userSelect = 'none';
+      document.body.style.userSelect = "none";
     });
 
-    document.addEventListener("mouseup", e => {
+    document.addEventListener("mouseup", () => {
       if (isResizing) {
         isResizing = false;
-        document.body.style.userSelect = 'auto';
+        document.body.style.userSelect = "auto";
 
-        // Save size to localStorage
+        const prefix = getPrefix();
         const width = win.offsetWidth;
         const height = win.offsetHeight;
-        localStorage.setItem(`windowSize_${win.id}`, JSON.stringify({ width, height }));
+        localStorage.setItem(`windowSize_${prefix}_${win.id}`, JSON.stringify({ width, height }));
       }
     });
 
@@ -136,8 +184,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let newWidth = startWidth + (e.clientX - startX);
       let newHeight = startHeight + (e.clientY - startY);
-
-      // Optional: set min/max sizes
       const minWidth = 200;
       const minHeight = 150;
       const maxWidth = window.innerWidth - win.offsetLeft;
@@ -150,14 +196,5 @@ document.addEventListener("DOMContentLoaded", () => {
       win.style.height = newHeight + "px";
     });
   });
-});
-document.getElementById("navToggle").addEventListener("click", () => {
-  document.getElementById("grid").classList.toggle("show");
-});
-document.querySelectorAll("#grid > div").forEach(btn => {
-  btn.addEventListener("click", () => {
-    if (window.innerWidth <= 600) {
-      document.getElementById("grid").classList.remove("show");
-    }
-  });
+
 });
